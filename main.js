@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const { importCookie } = require('./handle');
+const http = require("http");
 
 const app = express();
-const port = 443;
+const port = 3000;
 
 app.use(express.json());
 app.use(cors());
@@ -19,6 +20,9 @@ app.post('/import-cookie', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
+// Create HTTP server
+const server = http.createServer(app);
+
+server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
