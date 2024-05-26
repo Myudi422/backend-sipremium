@@ -4,37 +4,21 @@ const { getConnection } = require('../db');
 // Fungsi untuk mendapatkan format timestamp yang sesuai dengan MySQL
 function getMySQLTimestamp() {
   const now = new Date();
-  const year = now.getFullYear();
-  let month = now.getMonth() + 1;
-  let day = now.getDate();
-  let hour = now.getHours();
-  let minute = now.getMinutes();
-  let second = now.getSeconds();
-
-  if (month < 10) month = '0' + month;
-  if (day < 10) day = '0' + day;
-  if (hour < 10) hour = '0' + hour;
-  if (minute < 10) minute = '0' + minute;
-  if (second < 10) second = '0' + second;
-
-  const timestamp = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  const options = { timeZone: 'Asia/Jakarta' }; // Set timezone to GMT+7 (Asia/Jakarta)
+  
+  // Format tanggal sesuai dengan timezone yang ditetapkan
+  const timestamp = now.toLocaleString('en-US', options).replace(/T/, ' ').replace(/\..+/, '');
+  
   return timestamp;
 }
 
 async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpanel', server = 'Official') {
   const connection = await getConnection();
   const validation = 1;
+  let timestamp;
 
   try {
-    function getMySQLTimestamp() {
-        const now = new Date();
-        const options = { timeZone: 'Asia/Jakarta' }; // Set timezone to GMT+7 (Asia/Jakarta)
-        
-        // Format tanggal sesuai dengan timezone yang ditetapkan
-        const timestamp = now.toLocaleString('en-US', options).replace(/T/, ' ').replace(/\..+/, '');
-        
-        return timestamp;
-      }
+    timestamp = getMySQLTimestamp(); // Panggil getMySQLTimestamp() di sini
 
     const checkQuery = `SELECT * FROM cookies WHERE website = ? AND platform = ?`;
     const [results] = await connection.execute(checkQuery, [website, platform]);
