@@ -3,19 +3,16 @@ const { getConnection } = require('../db');
 
 function getMySQLTimestamp() {
     const now = new Date();
-    const year = now.getFullYear();
-    let month = now.getMonth() + 1;
-    let day = now.getDate();
-    let hour = now.getHours();
-    let minute = now.getMinutes();
-    let second = now.getSeconds();
-  
-    if (month < 10) month = '0' + month;
-    if (day < 10) day = '0' + day;
-    if (hour < 10) hour = '0' + hour;
-    if (minute < 10) minute = '0' + minute;
-    if (second < 10) second = '0' + second;
-  
+    const options = { timeZone: 'Asia/Jakarta' }; // Set timezone to WIB (Asia/Jakarta)
+    
+    // Format tanggal sesuai dengan timezone yang ditetapkan
+    const year = now.toLocaleString('en-US', options).slice(6, 10);
+    const month = ('0' + (now.getMonth() + 1)).slice(-2);
+    const day = ('0' + now.getDate()).slice(-2);
+    const hour = ('0' + now.getHours()).slice(-2);
+    const minute = ('0' + now.getMinutes()).slice(-2);
+    const second = ('0' + now.getSeconds()).slice(-2);
+    
     const timestamp = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     return timestamp;
   }
