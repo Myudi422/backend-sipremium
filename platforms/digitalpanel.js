@@ -21,32 +21,32 @@ function getMySQLTimestamp() {
   return timestamp;
 }
 
-// Fungsi untuk menyimpan cookie ke database
 async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpanel', server = 'Official') {
-  const connection = await getConnection();
-  const timestamp = getMySQLTimestamp();
-  const validation = 1;
-
-  try {
-    const checkQuery = `SELECT * FROM cookies WHERE website = ? AND platform = ?`;
-    const [results] = await connection.execute(checkQuery, [website, platform]);
-
-    if (results.length > 0) {
-      const updateQuery = `UPDATE cookies SET cookie_data = ?, timestamp = ?, server = ?, validasi = ? WHERE website = ? AND platform = ?`;
-      await connection.execute(updateQuery, [JSON.stringify(cookieData), timestamp, server, validation, website, platform]);
-      console.log(`Cookies updated in the database for website ${website}.`);
-    } else {
-      const insertQuery = `INSERT INTO cookies (website, cookie_data, timestamp, platform, server, validasi) VALUES (?, ?, ?, ?, ?, ?)`;
-      await connection.execute(insertQuery, [website, JSON.stringify(cookieData), timestamp, platform, server, validation]);
-      console.log(`Cookies saved to the database for website ${website}.`);
+    const connection = await getConnection();
+    const validation = 1;
+  
+    try {
+      const timestamp = getMySQLTimestamp(); // Panggil getMySQLTimestamp() di sini
+  
+      const checkQuery = `SELECT * FROM cookies WHERE website = ? AND platform = ?`;
+      const [results] = await connection.execute(checkQuery, [website, platform]);
+  
+      if (results.length > 0) {
+        const updateQuery = `UPDATE cookies SET cookie_data = ?, timestamp = ?, server = ?, validasi = ? WHERE website = ? AND platform = ?`;
+        await connection.execute(updateQuery, [JSON.stringify(cookieData), timestamp, server, validation, website, platform]);
+        console.log(`Cookies updated in the database for website ${website}.`);
+      } else {
+        const insertQuery = `INSERT INTO cookies (website, cookie_data, timestamp, platform, server, validasi) VALUES (?, ?, ?, ?, ?, ?)`;
+        await connection.execute(insertQuery, [website, JSON.stringify(cookieData), timestamp, platform, server, validation]);
+        console.log(`Cookies saved to the database for website ${website}.`);
+      }
+    } catch (error) {
+      console.error("Error while saving cookies to the database:", error);
+      throw error;
+    } finally {
+      connection.release();
     }
-  } catch (error) {
-    console.error("Error while saving cookies to the database:", error);
-    throw error;
-  } finally {
-    connection.release();
   }
-}
 
 async function importDigitalPanelCookie(credentials, selectedServer) {
   let browser;
