@@ -52,7 +52,7 @@ async function importDigitalPanelCookie(credentials, selectedServer) {
   let browser;
   try {
     console.log("Launching browser...");
-    browser = await puppeteer.launch({ headless: false });
+    browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     console.log("Opening a new page...");
