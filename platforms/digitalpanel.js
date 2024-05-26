@@ -1,16 +1,25 @@
 const puppeteer = require('puppeteer');
 const { getConnection } = require('../db');
 
-// Fungsi untuk mendapatkan format timestamp yang sesuai dengan MySQL
 function getMySQLTimestamp() {
-  const now = new Date();
-  const options = { timeZone: 'Asia/Jakarta' }; // Set timezone to GMT+7 (Asia/Jakarta)
+    const now = new Date();
+    const year = now.getFullYear();
+    let month = now.getMonth() + 1;
+    let day = now.getDate();
+    let hour = now.getHours();
+    let minute = now.getMinutes();
+    let second = now.getSeconds();
   
-  // Format tanggal sesuai dengan timezone yang ditetapkan
-  const timestamp = now.toLocaleString('en-US', options).replace(/T/, ' ').replace(/\..+/, '');
+    if (month < 10) month = '0' + month;
+    if (day < 10) day = '0' + day;
+    if (hour < 10) hour = '0' + hour;
+    if (minute < 10) minute = '0' + minute;
+    if (second < 10) second = '0' + second;
   
-  return timestamp;
-}
+    const timestamp = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    return timestamp;
+  }
+  
 
 async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpanel', server = 'Official', timestamp) {
   const connection = await getConnection();
