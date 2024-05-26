@@ -1,24 +1,11 @@
 const puppeteer = require('puppeteer');
 const { getConnection } = require('../db');
+const moment = require('moment-timezone');
 
 function getMySQLTimestamp() {
-    const now = new Date();
-    const year = now.getFullYear();
-    let month = now.getMonth() + 1;
-    let day = now.getDate();
-    let hour = now.getHours();
-    let minute = now.getMinutes();
-    let second = now.getSeconds();
-  
-    if (month < 10) month = '0' + month;
-    if (day < 10) day = '0' + day;
-    if (hour < 10) hour = '0' + hour;
-    if (minute < 10) minute = '0' + minute;
-    if (second < 10) second = '0' + second;
-  
-    const timestamp = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-    return timestamp;
-  }
+    const now = moment().tz('Asia/Jakarta');
+    return now.format('YYYY-MM-DD HH:mm:ss');
+}
   
 
 async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpanel', server = 'Official', timestamp) {

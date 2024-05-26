@@ -7,12 +7,12 @@
         "start": "npm install && node main.js",
         "heroku-postbuild": "mkdir -p ./.cache && mv /app/.cache/puppeteer ./.cache || true"
     },
-    
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.17.1",
-        "mysql": "^2.18.1",
         "http": "^0.0.1-security",
+        "moment-timezone": "^0.5.45",
+        "mysql": "^2.18.1",
         "mysql2": "^3.9.7",
         "puppeteer": "^16.2.0"
     }
