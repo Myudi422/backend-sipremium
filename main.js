@@ -4,7 +4,7 @@ const { importCookie } = require('./handle');
 const http = require("http");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Gunakan PORT Heroku atau default 3000
 
 app.use(express.json());
 app.use(cors());
