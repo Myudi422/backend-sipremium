@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Digital Panel Cookie</title>
+</head>
+<body>
+    <h1>Import Digital Panel Cookie</h1>
+    <button id="importButton">Import Cookie</button>
+    
+    <script>
+        document.getElementById('importButton').addEventListener('click', async () => {
+            try {
+                const response = await fetch('http://localhost:3000/import-cookie', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ platform: 'digitalpanel' })
+                });
+
+                if (response.ok) {
+                    alert('Cookie imported successfully!');
+                } else {
+                    const errorMessage = await response.text();
+                    alert(`Failed to import cookie: ${errorMessage}`);
+                }
+            } catch (error) {
+                console.error('Error importing cookie:', error);
+                alert('Error importing cookie. See console for details.');
+            }
+        });
+    </script>
+</body>
+</html>
