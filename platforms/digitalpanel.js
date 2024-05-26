@@ -26,7 +26,15 @@ async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpan
   const validation = 1;
 
   try {
-    const timestamp = getMySQLTimestamp();
+    function getMySQLTimestamp() {
+        const now = new Date();
+        const options = { timeZone: 'Asia/Jakarta' }; // Set timezone to GMT+7 (Asia/Jakarta)
+        
+        // Format tanggal sesuai dengan timezone yang ditetapkan
+        const timestamp = now.toLocaleString('en-US', options).replace(/T/, ' ').replace(/\..+/, '');
+        
+        return timestamp;
+      }
 
     const checkQuery = `SELECT * FROM cookies WHERE website = ? AND platform = ?`;
     const [results] = await connection.execute(checkQuery, [website, platform]);
