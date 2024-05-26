@@ -12,14 +12,11 @@ function getMySQLTimestamp() {
   return timestamp;
 }
 
-async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpanel', server = 'Official') {
+async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpanel', server = 'Official', timestamp) {
   const connection = await getConnection();
   const validation = 1;
-  let timestamp;
 
   try {
-    timestamp = getMySQLTimestamp(); // Panggil getMySQLTimestamp() di sini
-
     const checkQuery = `SELECT * FROM cookies WHERE website = ? AND platform = ?`;
     const [results] = await connection.execute(checkQuery, [website, platform]);
 
@@ -76,7 +73,11 @@ async function importDigitalPanelCookie(credentials, selectedServer) {
     await page.waitForNavigation({ waitUntil: "networkidle0" });
 
     const cookies = await page.cookies();
-    await saveCookiesToDatabase("https://app.digitalpanel.id/", cookies, "digitalpanel", selectedServer);
+
+    // Konversi format tanggal dan waktu menggunakan fungsi getMySQLTimestamp()
+    const timestamp = getMySQLTimestamp();
+
+    await saveCookiesToDatabase("https://app.digitalpanel.id/", cookies, "digitalpanel", selectedServer, timestamp);
 
     console.log("Proses sudah berhasil, klik ulang ekstensi.");
     return 'DigitalPanel cookie imported successfully.';
