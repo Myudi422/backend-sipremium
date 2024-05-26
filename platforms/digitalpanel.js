@@ -22,7 +22,7 @@ function getMySQLTimestamp() {
 }
 
 // Fungsi untuk menyimpan cookie ke database
-async function saveCookiesToDatabase(website, cookieData, platform = 'Freepik & Envato', server = 'Official') {
+async function saveCookiesToDatabase(website, cookieData, platform = 'digitalpanel', server = 'Official') {
   const connection = await getConnection();
   const timestamp = getMySQLTimestamp();
   const validation = 1;
