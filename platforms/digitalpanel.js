@@ -52,7 +52,12 @@ async function importDigitalPanelCookie(credentials, selectedServer) {
   let browser;
   try {
     console.log("Launching browser...");
-    browser = await puppeteer.launch({ headless: true });
+    // Sesuaikan opsi untuk peluncuran Puppeteer agar cocok dengan Heroku
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      // Tambahkan headless: true agar sesuai dengan kebijakan Heroku
+      headless: true
+    });
     const page = await browser.newPage();
 
     console.log("Opening a new page...");
