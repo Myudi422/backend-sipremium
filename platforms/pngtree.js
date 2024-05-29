@@ -42,11 +42,10 @@ async function importPNGTreeCookie(credentials, selectedServer) {
   let browser;
   try {
     console.log("Launching browser...");
-    // Sesuaikan opsi untuk peluncuran Puppeteer agar cocok dengan Heroku
     browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      // Tambahkan headless: true agar sesuai dengan kebijakan Heroku
-      headless: true,
+      headless: true, // Change to false to see the browser window
+      slowMo: 50, // Slow down by 50ms to better observe the process
     });
 
     const page = await browser.newPage();
@@ -57,17 +56,17 @@ async function importPNGTreeCookie(credentials, selectedServer) {
     await page.goto(LOGIN_URL, { waitUntil: "networkidle2" });
 
     console.log("Waiting for email input field...");
-    await page.waitForSelector("input[name='identifier']", { visible: true, timeout: 20000 });
+    await page.waitForSelector("input[name='identifier']", { visible: true, timeout: 30000 }); // Increased timeout
     console.log("Typing email...");
     await page.type("input[name='identifier']", credentials.email);
 
     console.log("Waiting for Next button...");
-    const nextButtonEmail = await page.waitForSelector("#identifierNext", { visible: true, timeout: 20000 });
+    const nextButtonEmail = await page.waitForSelector("#identifierNext", { visible: true, timeout: 30000 }); // Increased timeout
     console.log("Clicking Next button for email...");
     await nextButtonEmail.click();
 
     console.log("Waiting for password input field...");
-    await page.waitForSelector("input[name='Passwd']", { visible: true, timeout: 20000 });
+    await page.waitForSelector("input[name='Passwd']", { visible: true, timeout: 30000 }); // Increased timeout
     console.log("Typing password...");
     await page.type("input[name='Passwd']", credentials.password);
 
