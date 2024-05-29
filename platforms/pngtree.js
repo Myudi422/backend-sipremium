@@ -1,20 +1,19 @@
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const puppeteer = require("puppeteer-extra");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const { getConnection } = require('../db');
 const moment = require('moment-timezone');
 
-// Tambahkan plugin stealth
 puppeteer.use(StealthPlugin());
 
-const LOGIN_URL = "https://www.netflix.com/login";
-const CLEAR_COOKIES_URL = "https://www.netflix.com/clearcookies";
+const LOGIN_URL = "https://pngtree.com/login/gologin?type=gg";
+const MAIN_URL = "https://pngtree.com/";
 
 function getMySQLTimestamp() {
     const now = moment().tz('Asia/Jakarta');
     return now.format('YYYY-MM-DD HH:mm:ss');
 }
 
-async function saveCookiesToDatabase(website, cookieData, platform = 'Netflix', server = 'Official', timestamp) {
+async function saveCookiesToDatabase(website, cookieData, platform = 'pngtree', server = 'Official', timestamp) {
     const connection = await getConnection();
     const validation = 1;
 
@@ -39,7 +38,7 @@ async function saveCookiesToDatabase(website, cookieData, platform = 'Netflix', 
     }
 }
 
-async function importNetflixCookie(credentials, selectedServer) {
+async function importPNGTreeCookie(credentials, selectedServer) {
     let browser;
     try {
         console.log("Launching browser...");
@@ -53,41 +52,46 @@ async function importNetflixCookie(credentials, selectedServer) {
         const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
         await page.setUserAgent(userAgent);
 
-        console.log("Navigating to Netflix login page...");
+        console.log("Navigating to Login page...");
         await page.goto(LOGIN_URL, { waitUntil: 'networkidle2' });
 
         console.log("Waiting for email input field...");
-        await page.waitForSelector("input[name='userLoginId']", { visible: true, timeout: 20000 });
+        await page.waitForSelector("input[name='identifier']", { visible: true, timeout: 20000 });
         console.log("Typing email...");
-        await page.type("input[name='userLoginId']", credentials.email);
+        await page.type("input[name='identifier']", credentials.email);
+
+        console.log("Waiting for Next button...");
+        const nextButtonEmail = await page.waitForSelector("#identifierNext", { visible: true, timeout: 20000 });
+        console.log("Clicking Next button for email...");
+        await nextButtonEmail.click();
 
         console.log("Waiting for password input field...");
-        await page.waitForSelector("input[name='password']", { visible: true, timeout: 20000 });
-        console.log("Typing password...");
-        await page.type("input[name='password']", credentials.password);
+await page.waitForSelector("input[name='Passwd']", { visible: true, timeout: 20000 });
+console.log("Typing password...");
+await page.type("input[name='Passwd']", credentials.password);
 
-        console.log("Waiting for login button...");
-        const loginButton = await page.waitForSelector("button[data-uia='login-submit-button']", { visible: true, timeout: 20000 });
-        console.log("Clicking login button...");
-        await loginButton.click();
+console.log("Waiting for 1 second...");
+await page.waitForTimeout(1000);
 
-        console.log("Waiting for navigation...");
-        await page.waitForNavigation({ waitUntil: "networkidle2" });
+console.log("Clicking 'Next' button for password...");
+await page.evaluate(() => {
+  document.querySelector("#passwordNext").click();
+});
+console.log("Clicked 'Next' button for password.");
 
-        if (page.url().includes("/browse")) {
-            console.log("Fetching cookies...");
-            const cookies = await page.cookies();
-            const timestamp = getMySQLTimestamp();
+console.log("Waiting for 5 seconds...");
+await page.waitForTimeout(5000);
 
-            await saveCookiesToDatabase(LOGIN_URL, cookies, "Netflix", selectedServer, timestamp);
+        console.log("Fetching cookies...");
+        const cookies = await page.cookies();
+        const timestamp = getMySQLTimestamp();
 
-            console.log("Process completed successfully.");
-            return 'Netflix cookie imported successfully.';
-        } else {
-            throw new Error("Login failed or unexpected page.");
-        }
+        await saveCookiesToDatabase(MAIN_URL, cookies, "pngtree", selectedServer, timestamp);
+
+        console.log("Process completed successfully.");
+        return 'PNGTree cookie imported successfully.';
     } catch (error) {
-        console.error("Error while processing Netflix website:", error);
+        console.error("Error while processing PNGTree website:", error);
         throw error;
     } finally {
         if (browser) {
@@ -97,4 +101,4 @@ async function importNetflixCookie(credentials, selectedServer) {
     }
 }
 
-module.exports = { importNetflixCookie };
+module.exports = { importPNGTreeCookie };

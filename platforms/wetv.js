@@ -6,15 +6,14 @@ const moment = require('moment-timezone');
 // Tambahkan plugin stealth
 puppeteer.use(StealthPlugin());
 
-const LOGIN_URL = "https://www.netflix.com/login";
-const CLEAR_COOKIES_URL = "https://www.netflix.com/clearcookies";
+const LOGIN_URL = 'https://wetv.vip/';
 
 function getMySQLTimestamp() {
     const now = moment().tz('Asia/Jakarta');
     return now.format('YYYY-MM-DD HH:mm:ss');
 }
 
-async function saveCookiesToDatabase(website, cookieData, platform = 'Netflix', server = 'Official', timestamp) {
+async function saveCookiesToDatabase(website, cookieData, platform = 'wetv', server = 'Official', timestamp) {
     const connection = await getConnection();
     const validation = 1;
 
@@ -39,7 +38,7 @@ async function saveCookiesToDatabase(website, cookieData, platform = 'Netflix', 
     }
 }
 
-async function importNetflixCookie(credentials, selectedServer) {
+async function importWeTvCookie(credentials, selectedServer) {
     let browser;
     try {
         console.log("Launching browser...");
@@ -50,44 +49,50 @@ async function importNetflixCookie(credentials, selectedServer) {
         });
 
         const page = await browser.newPage();
-        const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
+
+        // Set the default Windows user agent
+        const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36';
         await page.setUserAgent(userAgent);
 
-        console.log("Navigating to Netflix login page...");
+        console.log("Navigating to WeTV login page...");
         await page.goto(LOGIN_URL, { waitUntil: 'networkidle2' });
 
-        console.log("Waiting for email input field...");
-        await page.waitForSelector("input[name='userLoginId']", { visible: true, timeout: 20000 });
+        console.log("Waiting for login popup button...");
+        const loginPopupButton = await page.waitForSelector('img.user__portrait--header', { timeout: 20000 });
+        if (loginPopupButton) {
+            console.log("Clicking the login popup button...");
+            await loginPopupButton.click();
+            await page.waitForSelector("div.login__form-row_14cwP > div[data-type='phone-num'] > input", { visible: true, timeout: 20000 });
+        } else {
+            throw new Error("Login popup button not found");
+        }
+
         console.log("Typing email...");
-        await page.type("input[name='userLoginId']", credentials.email);
+        await page.type("div.login__form-row_14cwP > div[data-type='phone-num'] > input", credentials.email);
 
-        console.log("Waiting for password input field...");
-        await page.waitForSelector("input[name='password']", { visible: true, timeout: 20000 });
         console.log("Typing password...");
-        await page.type("input[name='password']", credentials.password);
+        await page.type("input[type='password'].login__input_gvsAX", credentials.password);
 
-        console.log("Waiting for login button...");
-        const loginButton = await page.waitForSelector("button[data-uia='login-submit-button']", { visible: true, timeout: 20000 });
         console.log("Clicking login button...");
-        await loginButton.click();
+        const loginButtonHandle = await page.waitForSelector("button.login__btn_2J4FF[data-disabled='0']", { visible: true, timeout: 20000 });
 
-        console.log("Waiting for navigation...");
-        await page.waitForNavigation({ waitUntil: "networkidle2" });
+        if (loginButtonHandle) {
+            await loginButtonHandle.evaluate(button => button.click());
+            console.log("Waiting for navigation...");
+            await page.waitForNavigation({ waitUntil: "networkidle2" });
 
-        if (page.url().includes("/browse")) {
-            console.log("Fetching cookies...");
             const cookies = await page.cookies();
             const timestamp = getMySQLTimestamp();
 
-            await saveCookiesToDatabase(LOGIN_URL, cookies, "Netflix", selectedServer, timestamp);
+            await saveCookiesToDatabase(LOGIN_URL, cookies, "wetv", selectedServer, timestamp);
 
             console.log("Process completed successfully.");
-            return 'Netflix cookie imported successfully.';
+            return 'WeTV cookie imported successfully.';
         } else {
-            throw new Error("Login failed or unexpected page.");
+            throw new Error("Login button not found or disabled");
         }
     } catch (error) {
-        console.error("Error while processing Netflix website:", error);
+        console.error("Error while processing WeTV website:", error);
         throw error;
     } finally {
         if (browser) {
@@ -97,4 +102,4 @@ async function importNetflixCookie(credentials, selectedServer) {
     }
 }
 
-module.exports = { importNetflixCookie };
+module.exports = { importWeTvCookie };
