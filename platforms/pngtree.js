@@ -44,8 +44,7 @@ async function importPNGTreeCookie(credentials, selectedServer) {
     console.log("Launching browser...");
     browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      headless: true, // Change to false to see the browser window
-      slowMo: 50, // Slow down by 50ms to better observe the process
+      headless: true,
     });
 
     const page = await browser.newPage();
@@ -56,30 +55,29 @@ async function importPNGTreeCookie(credentials, selectedServer) {
     await page.goto(LOGIN_URL, { waitUntil: "networkidle2" });
 
     console.log("Waiting for email input field...");
-    await page.waitForSelector("input[name='identifier']", { visible: true, timeout: 30000 }); // Increased timeout
+    await page.waitForSelector('input[name="identifier"]', { visible: true });
     console.log("Typing email...");
-    await page.type("input[name='identifier']", credentials.email);
+    await page.type('input[name="identifier"]', credentials.email);
 
     console.log("Waiting for Next button...");
-    const nextButtonEmail = await page.waitForSelector("#identifierNext", { visible: true, timeout: 30000 }); // Increased timeout
+    await page.waitForSelector("#identifierNext", { visible: true });
     console.log("Clicking Next button for email...");
-    await nextButtonEmail.click();
+    await page.click("#identifierNext");
 
     console.log("Waiting for password input field...");
-    await page.waitForSelector("input[name='Passwd']", { visible: true, timeout: 30000 }); // Increased timeout
+    await page.waitForSelector('input[name="Passwd"]', { visible: true });
     console.log("Typing password...");
-    await page.type("input[name='Passwd']", credentials.password);
+    await page.type('input[name="Passwd"]', credentials.password);
 
-    console.log("Waiting for 1 second...");
+    console.log("Waiting for a moment to ensure password is filled...");
     await page.waitForTimeout(1000);
 
     console.log("Clicking 'Next' button for password...");
     await page.evaluate(() => {
       document.querySelector("#passwordNext").click();
     });
-    console.log("Clicked 'Next' button for password.");
 
-    console.log("Waiting for 5 seconds...");
+    console.log("Waiting for 5 seconds to keep the browser open...");
     await page.waitForTimeout(5000);
 
     console.log("Fetching cookies...");
