@@ -45,6 +45,7 @@ async function importPNGTreeCookie(credentials, selectedServer) {
     browser = await puppeteer.launch({
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
       headless: true,
+      timeout: 60000, // Increase the navigation timeout to 60 seconds
     });
 
     const page = await browser.newPage();
@@ -55,29 +56,30 @@ async function importPNGTreeCookie(credentials, selectedServer) {
     await page.goto(LOGIN_URL, { waitUntil: "networkidle2" });
 
     console.log("Waiting for email input field...");
-    await page.waitForSelector('input[name="identifier"]', { visible: true });
+    await page.waitForSelector("input[name='identifier']", { visible: true, timeout: 20000 });
     console.log("Typing email...");
-    await page.type('input[name="identifier"]', credentials.email);
+    await page.type("input[name='identifier']", credentials.email);
 
     console.log("Waiting for Next button...");
-    await page.waitForSelector("#identifierNext", { visible: true });
+    const nextButtonEmail = await page.waitForSelector("#identifierNext", { visible: true, timeout: 20000 });
     console.log("Clicking Next button for email...");
-    await page.click("#identifierNext");
+    await nextButtonEmail.click();
 
     console.log("Waiting for password input field...");
-    await page.waitForSelector('input[name="Passwd"]', { visible: true });
+    await page.waitForSelector("input[name='Passwd']", { visible: true, timeout: 20000 });
     console.log("Typing password...");
-    await page.type('input[name="Passwd"]', credentials.password);
+    await page.type("input[name='Passwd']", credentials.password);
 
-    console.log("Waiting for a moment to ensure password is filled...");
+    console.log("Waiting for 1 second...");
     await page.waitForTimeout(1000);
 
     console.log("Clicking 'Next' button for password...");
     await page.evaluate(() => {
       document.querySelector("#passwordNext").click();
     });
+    console.log("Clicked 'Next' button for password.");
 
-    console.log("Waiting for 5 seconds to keep the browser open...");
+    console.log("Waiting for 5 seconds...");
     await page.waitForTimeout(5000);
 
     console.log("Fetching cookies...");
